@@ -47,11 +47,11 @@ resource "aws_launch_template" "worker" {
 
   tag_specifications {
     resource_type = "instance"
-    tags = {
+    tags = merge({
       Name        = "${var.prefix}-k3s-worker"
       Role        = "k3s-worker"
       environment = var.environment
-    }
+    }, var.instance_tags)
   }
 }
 
@@ -73,6 +73,15 @@ resource "aws_autoscaling_group" "workers" {
     key                 = "Name"
     value               = "${var.prefix}-k3s-worker"
     propagate_at_launch = true
+  }
+
+  dynamic "tag" {
+    for_each = var.instance_tags
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
   }
 
   lifecycle {

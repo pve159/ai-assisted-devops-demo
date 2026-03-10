@@ -57,3 +57,9 @@ variable "k3s_token" {
   type        = string
   sensitive   = true
 }
+
+variable "instance_tags" {
+  description = "Tags to propagate to worker instances via tag_specifications and ASG tag blocks"
+  type        = map(string)
+  default     = {}
+}

@@ -83,6 +83,7 @@ module "k3s_workers" {
   root_volume_size     = var.worker_volume_size
   k3s_version          = var.k3s_version
   k3s_token            = random_password.k3s_token.result
+  instance_tags        = var.instance_tags
 
   depends_on = [aws_route_table_association.private, aws_ssm_parameter.k3s_token]
 }

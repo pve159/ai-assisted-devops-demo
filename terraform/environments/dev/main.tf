@@ -4,9 +4,10 @@ provider "aws" {
   default_tags {
     tags = {
       Project     = "ai-demo"
-      Environment = "dev"
+      Environment = "Dev"
       ManagedBy   = "terraform"
       Owner       = "platform-team"
+      Service     = "k3s-platform"
     }
   }
 }

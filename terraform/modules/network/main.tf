@@ -55,7 +55,7 @@ resource "aws_subnet" "private" {
 # No SSH: all admin access goes through AWS SSM Session Manager.
 resource "aws_security_group" "bastion" {
   name        = "${var.prefix}-sg-bastion"
-  description = "Bastion — NAT instance + HAProxy. No SSH. Admin via SSM."
+  description = "Bastion - NAT instance + HAProxy. No SSH. Admin via SSM."
   vpc_id      = aws_vpc.main.id
 
   # Public app traffic (forwarded by HAProxy to k3s ingress controller)
@@ -77,7 +77,7 @@ resource "aws_security_group" "bastion" {
 
   # Allow all traffic from private subnets (NAT return traffic is stateful)
   ingress {
-    description = "NAT — forwarded traffic from private subnets"
+    description = "NAT - forwarded traffic from private subnets"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -98,7 +98,7 @@ resource "aws_security_group" "bastion" {
 # No SSH: admin access via SSM. HAProxy on bastion is the only ingress source.
 resource "aws_security_group" "k3s" {
   name        = "${var.prefix}-sg-k3s"
-  description = "k3s cluster — intra-cluster traffic + HAProxy ingress. No SSH."
+  description = "k3s cluster - intra-cluster traffic + HAProxy ingress. No SSH."
   vpc_id      = aws_vpc.main.id
 
   ingress {

@@ -1,0 +1,53 @@
+variable "prefix" {
+  description = "Resource name prefix"
+  type        = string
+}
+
+variable "environment" {
+  description = "Environment name (dev, prod)"
+  type        = string
+}
+
+variable "instance_type" {
+  description = "EC2 instance type for k3s workers"
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "workers_per_subnet" {
+  description = "Number of worker nodes per private subnet (0 to disable workers)"
+  type        = number
+  default     = 0
+}
+
+variable "subnet_ids" {
+  description = "Private subnet IDs — workers are distributed across these subnets"
+  type        = list(string)
+}
+
+variable "k3s_sg_id" {
+  description = "Security group ID for k3s nodes"
+  type        = string
+}
+
+variable "iam_instance_profile" {
+  description = "IAM instance profile name"
+  type        = string
+}
+
+variable "master_private_ip" {
+  description = "Private IP of the first k3s master (used as cluster join endpoint)"
+  type        = string
+}
+
+variable "root_volume_size" {
+  description = "Root EBS volume size in GB"
+  type        = number
+  default     = 20
+}
+
+variable "k3s_version" {
+  description = "k3s version to install (must match master)"
+  type        = string
+  default     = "v1.29.0+k3s1"
+}

@@ -1,0 +1,13 @@
+# Copy to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored.
+
+aws_region           = "eu-west-3"
+availability_zones   = ["eu-west-3a", "eu-west-3b"]
+public_subnet_cidrs  = ["10.1.1.0/24"]
+private_subnet_cidrs = ["10.1.10.0/24", "10.1.11.0/24"]
+master_instance_type = "t3.large"
+worker_instance_type = "t3.large"
+workers_per_subnet   = 2
+k3s_version          = "v1.29.0+k3s1"
+
+# All admin access is via AWS SSM Session Manager — no SSH keys required.

@@ -1,0 +1,11 @@
+# Copy to terraform.tfvars and adjust if needed.
+# terraform.tfvars is gitignored.
+
+aws_region           = "eu-west-3"
+github_repository    = "pve159/ai-assisted-devops-demo"
+create_oidc_provider = true
+
+# Set to false if the GitHub OIDC provider already exists in this AWS account
+# (only one can exist per account). Then provide the existing ARN:
+# create_oidc_provider       = false
+# existing_oidc_provider_arn = "arn:aws:iam::<account_id>:oidc-provider/token.actions.githubusercontent.com"

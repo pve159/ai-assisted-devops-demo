@@ -133,6 +133,7 @@ resource "aws_iam_role_policy" "ssm" {
     Version = "2012-10-17"
     Statement = [
       {
+        # Parameter-level actions — can be scoped to a path
         Sid    = "SSMParameters"
         Effect = "Allow"
         Action = [
@@ -140,11 +141,17 @@ resource "aws_iam_role_policy" "ssm" {
           "ssm:GetParameters",
           "ssm:PutParameter",
           "ssm:DeleteParameter",
-          "ssm:DescribeParameters",
           "ssm:AddTagsToResource",
           "ssm:ListTagsForResource"
         ]
         Resource = "arn:aws:ssm:*:*:parameter/ai-demo/*"
+      },
+      {
+        # DescribeParameters is a list action — AWS does not support resource-level restrictions
+        Sid      = "SSMDescribe"
+        Effect   = "Allow"
+        Action   = ["ssm:DescribeParameters"]
+        Resource = "*"
       }
     ]
   })

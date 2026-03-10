@@ -18,6 +18,7 @@ module "bastion" {
   subnet_id            = module.network.public_subnet_ids[0]
   bastion_sg_id        = module.network.bastion_sg_id
   iam_instance_profile = aws_iam_instance_profile.bastion.name
+  instance_tags        = var.instance_tags
 }
 
 # Private route tables: one per private subnet, default route via bastion ENI (NAT)
@@ -65,6 +66,7 @@ module "k3s_masters" {
   root_volume_size     = var.master_volume_size
   k3s_version          = var.k3s_version
   k3s_token            = random_password.k3s_token.result
+  instance_tags        = var.instance_tags
 
   depends_on = [aws_route_table_association.private, aws_ssm_parameter.k3s_token]
 }

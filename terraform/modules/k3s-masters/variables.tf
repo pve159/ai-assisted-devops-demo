@@ -51,3 +51,9 @@ variable "k3s_token" {
   type        = string
   sensitive   = true
 }
+
+variable "instance_tags" {
+  description = "Tags to apply to root EBS volumes (not covered by provider default_tags)"
+  type        = map(string)
+  default     = {}
+}

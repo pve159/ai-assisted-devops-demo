@@ -30,6 +30,7 @@ resource "aws_instance" "master" {
     volume_size = var.root_volume_size
     volume_type = "gp3"
     encrypted   = true
+    tags        = var.instance_tags
   }
 
   user_data = templatefile("${path.module}/templates/k3s-server-init.sh.tpl", {

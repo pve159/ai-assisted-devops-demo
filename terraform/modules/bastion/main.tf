@@ -27,6 +27,7 @@ resource "aws_instance" "bastion" {
     volume_size = 8
     volume_type = "gp3"
     encrypted   = true
+    tags        = var.instance_tags
   }
 
   user_data = templatefile("${path.module}/templates/bastion-init.sh.tpl", {

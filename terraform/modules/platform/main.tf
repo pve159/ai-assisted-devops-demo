@@ -18,6 +18,7 @@ module "bastion" {
   subnet_id            = module.network.public_subnet_ids[0]
   bastion_sg_id        = module.network.bastion_sg_id
   iam_instance_profile = aws_iam_instance_profile.bastion.name
+  instance_tags        = var.instance_tags
 }
 
 # Private route tables: one per private subnet, default route via bastion ENI (NAT)
@@ -39,6 +40,19 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private[count.index].id
 }
 
+resource "random_password" "k3s_token" {
+  length  = 48
+  special = false
+}
+
+resource "aws_ssm_parameter" "k3s_token" {
+  name  = "/ai-demo/${var.environment}/k3s-token"
+  type  = "SecureString"
+  value = random_password.k3s_token.result
+
+  tags = { Name = "${var.prefix}-k3s-token" }
+}
+
 module "k3s_masters" {
   source = "../k3s-masters"
 
@@ -51,8 +65,10 @@ module "k3s_masters" {
   iam_instance_profile = aws_iam_instance_profile.k3s.name
   root_volume_size     = var.master_volume_size
   k3s_version          = var.k3s_version
+  k3s_token            = random_password.k3s_token.result
+  instance_tags        = var.instance_tags
 
-  depends_on = [aws_route_table_association.private]
+  depends_on = [aws_route_table_association.private, aws_ssm_parameter.k3s_token]
 }
 
 module "k3s_workers" {
@@ -68,6 +84,8 @@ module "k3s_workers" {
   master_private_ip    = module.k3s_masters.private_ips[0]
   root_volume_size     = var.worker_volume_size
   k3s_version          = var.k3s_version
+  k3s_token            = random_password.k3s_token.result
+  instance_tags        = var.instance_tags
 
-  depends_on = [aws_route_table_association.private]
+  depends_on = [aws_route_table_association.private, aws_ssm_parameter.k3s_token]
 }

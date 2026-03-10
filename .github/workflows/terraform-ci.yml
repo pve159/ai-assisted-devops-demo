@@ -149,11 +149,17 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name: Upload plan artifact
+      - name: Export plan as JSON (for Infracost)
+        working-directory: ${{ env.WORKING_DIR }}
+        run: terraform show -json tfplan > tfplan.json
+
+      - name: Upload plan artifacts
         uses: actions/upload-artifact@v4
         with:
           name: tfplan-dev
-          path: ${{ env.WORKING_DIR }}/tfplan
+          path: |
+            ${{ env.WORKING_DIR }}/tfplan
+            ${{ env.WORKING_DIR }}/tfplan.json
           retention-days: 5
 
   infracost:
@@ -161,7 +167,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: plan
     steps:
-      - uses: actions/checkout@v4
+      - name: Download plan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-dev
 
       - name: Setup Infracost
         uses: infracost/actions/setup@v3
@@ -171,11 +180,9 @@ jobs:
       - name: Generate Infracost estimate
         run: |
           infracost breakdown \
-            --path ${{ env.WORKING_DIR }} \
+            --path tfplan.json \
             --format json \
             --out-file infracost.json
-        env:
-          INFRACOST_TERRAFORM_WORKSPACE: dev
 
       - name: Post Infracost comment on PR
         run: |

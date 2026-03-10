@@ -32,3 +32,9 @@ variable "iam_instance_profile" {
   description = "IAM instance profile name (needs ec2:DescribeInstances for HAProxy discovery)"
   type        = string
 }
+
+variable "instance_tags" {
+  description = "Tags to apply to root EBS volumes (not covered by provider default_tags)"
+  type        = map(string)
+  default     = {}
+}

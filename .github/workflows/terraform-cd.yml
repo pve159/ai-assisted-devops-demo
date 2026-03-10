@@ -39,22 +39,14 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Download plan artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan-${{ matrix.environment }}
-          path: terraform/environments/${{ matrix.environment }}
-        continue-on-error: true
-
       - name: terraform init
         working-directory: terraform/environments/${{ matrix.environment }}
         run: terraform init
 
+      - name: terraform plan
+        working-directory: terraform/environments/${{ matrix.environment }}
+        run: terraform plan -no-color -out=tfplan
+
       - name: terraform apply
         working-directory: terraform/environments/${{ matrix.environment }}
-        run: |
-          if [ -f tfplan ]; then
-            terraform apply -auto-approve tfplan
-          else
-            terraform apply -auto-approve
-          fi
+        run: terraform apply -auto-approve tfplan

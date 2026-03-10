@@ -4,17 +4,13 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-arm64-server-*"]
   }
 
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
   }
-}
-
-data "aws_ssm_parameter" "k3s_token" {
-  name = "/ai-demo/${var.environment}/k3s-token"
 }
 
 resource "aws_launch_template" "worker" {
@@ -45,17 +41,17 @@ resource "aws_launch_template" "worker" {
   user_data = base64encode(templatefile("${path.module}/templates/k3s-agent-init.sh.tpl", {
     k3s_version = var.k3s_version
     k3s_url     = "https://${var.master_private_ip}:6443"
-    k3s_token   = data.aws_ssm_parameter.k3s_token.value
+    k3s_token   = var.k3s_token
     environment = var.environment
   }))
 
   tag_specifications {
     resource_type = "instance"
-    tags = {
+    tags = merge({
       Name        = "${var.prefix}-k3s-worker"
       Role        = "k3s-worker"
       environment = var.environment
-    }
+    }, var.instance_tags)
   }
 }
 
@@ -77,6 +73,15 @@ resource "aws_autoscaling_group" "workers" {
     key                 = "Name"
     value               = "${var.prefix}-k3s-worker"
     propagate_at_launch = true
+  }
+
+  dynamic "tag" {
+    for_each = var.instance_tags
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
   }
 
   lifecycle {

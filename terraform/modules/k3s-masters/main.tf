@@ -4,7 +4,7 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-arm64-server-*"]
   }
 
   filter {
@@ -30,10 +30,12 @@ resource "aws_instance" "master" {
     volume_size = var.root_volume_size
     volume_type = "gp3"
     encrypted   = true
+    tags        = var.instance_tags
   }
 
   user_data = templatefile("${path.module}/templates/k3s-server-init.sh.tpl", {
     k3s_version = var.k3s_version
+    k3s_token   = var.k3s_token
     environment = var.environment
     aws_region  = var.aws_region
     ssm_path    = "/ai-demo/${var.environment}/kubeconfig"

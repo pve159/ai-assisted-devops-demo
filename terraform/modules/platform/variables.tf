@@ -69,3 +69,9 @@ variable "k3s_version" {
   type        = string
   default     = "v1.29.0+k3s1"
 }
+
+variable "instance_tags" {
+  description = "Tags to propagate to EC2 instances via ASG tag blocks and launch template tag_specifications (not covered by provider default_tags)"
+  type        = map(string)
+  default     = {}
+}

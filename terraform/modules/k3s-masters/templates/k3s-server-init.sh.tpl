@@ -5,6 +5,8 @@ set -euo pipefail
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" sh -s - server \
   --write-kubeconfig-mode 644 \
   --disable traefik \
+  --disable servicelb \
+  --disable local-storage \
   --node-label "environment=${environment}"
 
 # Wait until the node is Ready

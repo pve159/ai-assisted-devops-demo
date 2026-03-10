@@ -31,15 +31,15 @@ graph TB
             end
 
             subgraph AZ1["Private subnet  10.0.10.0/24  (eu-west-3a)"]
-                M1["k3s Master 1\nt3.medium"]
-                W1["k3s Worker\nt3.medium"]
-                W2["k3s Worker\nt3.medium"]
+                M1["k3s Master 1\nt3.micro"]
+                W1["k3s Worker\nt3.micro"]
+                W2["k3s Worker\nt3.micro"]
             end
 
             subgraph AZ2["Private subnet  10.0.11.0/24  (eu-west-3b)"]
-                M2["k3s Master 2\nt3.medium"]
-                W3["k3s Worker\nt3.medium"]
-                W4["k3s Worker\nt3.medium"]
+                M2["k3s Master 2\nt3.micro"]
+                W3["k3s Worker\nt3.micro"]
+                W4["k3s Worker\nt3.micro"]
             end
         end
 

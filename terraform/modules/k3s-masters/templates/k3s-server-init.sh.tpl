@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Install k3s server
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" sh -s - server \
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" K3S_TOKEN="${k3s_token}" sh -s - server \
   --write-kubeconfig-mode 644 \
   --disable traefik \
   --disable servicelb \

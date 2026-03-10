@@ -34,6 +34,7 @@ resource "aws_instance" "master" {
 
   user_data = templatefile("${path.module}/templates/k3s-server-init.sh.tpl", {
     k3s_version = var.k3s_version
+    k3s_token   = var.k3s_token
     environment = var.environment
     aws_region  = var.aws_region
     ssm_path    = "/ai-demo/${var.environment}/kubeconfig"

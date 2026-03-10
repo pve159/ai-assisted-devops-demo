@@ -13,10 +13,6 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-data "aws_ssm_parameter" "k3s_token" {
-  name = "/ai-demo/${var.environment}/k3s-token"
-}
-
 resource "aws_launch_template" "worker" {
   name_prefix   = "${var.prefix}-k3s-worker-"
   image_id      = data.aws_ami.ubuntu.id
@@ -45,7 +41,7 @@ resource "aws_launch_template" "worker" {
   user_data = base64encode(templatefile("${path.module}/templates/k3s-agent-init.sh.tpl", {
     k3s_version = var.k3s_version
     k3s_url     = "https://${var.master_private_ip}:6443"
-    k3s_token   = data.aws_ssm_parameter.k3s_token.value
+    k3s_token   = var.k3s_token
     environment = var.environment
   }))
 

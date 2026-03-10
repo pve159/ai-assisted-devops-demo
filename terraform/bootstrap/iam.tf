@@ -119,6 +119,13 @@ resource "aws_iam_role_policy" "iam" {
           "iam:UntagInstanceProfile"
         ]
         Resource = "arn:aws:iam::*:instance-profile/${local.prefix}-*"
+      },
+      {
+        # Required to create the AutoScaling service-linked role on first use
+        Sid      = "IAMServiceLinkedRole"
+        Effect   = "Allow"
+        Action   = ["iam:CreateServiceLinkedRole"]
+        Resource = "arn:aws:iam::*:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
       }
     ]
   })

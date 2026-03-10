@@ -2,8 +2,7 @@ locals {
   env             = "prod"
   bastion_id      = module.platform.bastion_instance_id
   bastion_ip      = module.platform.bastion_public_ip
-  master_ids      = module.platform.master_instance_ids
-  first_master_id = module.platform.master_instance_ids[0]
+  master_ids = module.platform.master_instance_ids
 }
 
 output "bastion_public_ip" {

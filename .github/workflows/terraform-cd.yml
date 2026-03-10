@@ -1,0 +1,60 @@
+name: Terraform CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "terraform/**"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TF_VERSION: "1.10.0"
+  AWS_REGION: "eu-west-3"
+
+jobs:
+  apply:
+    name: Terraform Apply — ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ matrix.environment }}
+
+    strategy:
+      matrix:
+        environment: [dev]
+        # Add prod here when ready, with a required GitHub Environment reviewer
+      max-parallel: 1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download plan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ matrix.environment }}
+          path: terraform/environments/${{ matrix.environment }}
+        continue-on-error: true
+
+      - name: terraform init
+        working-directory: terraform/environments/${{ matrix.environment }}
+        run: terraform init
+
+      - name: terraform apply
+        working-directory: terraform/environments/${{ matrix.environment }}
+        run: |
+          if [ -f tfplan ]; then
+            terraform apply -auto-approve tfplan
+          else
+            terraform apply -auto-approve
+          fi

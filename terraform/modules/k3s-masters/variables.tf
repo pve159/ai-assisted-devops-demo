@@ -1,0 +1,47 @@
+variable "prefix" {
+  description = "Resource name prefix"
+  type        = string
+}
+
+variable "environment" {
+  description = "Environment name (dev, prod)"
+  type        = string
+}
+
+variable "aws_region" {
+  description = "AWS region"
+  type        = string
+}
+
+variable "instance_type" {
+  description = "EC2 instance type for k3s masters"
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "subnet_ids" {
+  description = "Private subnet IDs — one master will be created per subnet"
+  type        = list(string)
+}
+
+variable "k3s_sg_id" {
+  description = "Security group ID for k3s nodes"
+  type        = string
+}
+
+variable "iam_instance_profile" {
+  description = "IAM instance profile name"
+  type        = string
+}
+
+variable "root_volume_size" {
+  description = "Root EBS volume size in GB"
+  type        = number
+  default     = 30
+}
+
+variable "k3s_version" {
+  description = "k3s version to install"
+  type        = string
+  default     = "v1.29.0+k3s1"
+}

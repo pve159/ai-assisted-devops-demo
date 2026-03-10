@@ -1,0 +1,111 @@
+name: Terraform Drift Detection
+
+on:
+  schedule:
+    # Every day at 07:00 UTC
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+env:
+  TF_VERSION: "1.10.0"
+  AWS_REGION: "eu-west-3"
+
+jobs:
+  drift:
+    name: Drift check — ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [dev]
+        # Add prod when deployed: [dev, prod]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: terraform init
+        working-directory: terraform/environments/${{ matrix.environment }}
+        run: terraform init
+
+      - name: terraform plan
+        id: plan
+        working-directory: terraform/environments/${{ matrix.environment }}
+        run: |
+          terraform plan -detailed-exitcode -no-color -out=tfplan 2>&1 | tee plan.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+
+      - name: Open GitHub issue on drift detected
+        if: steps.plan.outputs.exit_code == '2'
+        uses: actions/github-script@v7
+        env:
+          PLAN: ${{ steps.plan.outputs.stdout }}
+        with:
+          script: |
+            const env = '${{ matrix.environment }}';
+            const title = `🔴 Terraform drift detected — ${env}`;
+
+            // Close any existing open drift issue for this environment
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: `drift,${env}`,
+            });
+            for (const issue of issues.data) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+              });
+            }
+
+            const fs = require('fs');
+            const plan = fs.readFileSync('terraform/environments/${{ matrix.environment }}/plan.txt', 'utf8');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              labels: ['drift', env],
+              body: `### Terraform drift detected in \`${env}\`
+
+            The live infrastructure no longer matches the Terraform state.
+
+            <details><summary>Show plan</summary>
+
+            \`\`\`
+            ${plan.slice(0, 60000)}
+            \`\`\`
+
+            </details>
+
+            **To fix:** run \`terraform apply\` in \`terraform/environments/${env}\` or trigger the [Terraform CD](${{ github.server_url }}/${{ github.repository }}/actions/workflows/terraform-cd.yml) workflow.`,
+            });
+
+      - name: No drift
+        if: steps.plan.outputs.exit_code == '0'
+        run: echo "✅ No drift detected in ${{ matrix.environment }}"
+
+      - name: Plan failed
+        if: steps.plan.outputs.exit_code == '1'
+        run: |
+          echo "❌ terraform plan failed for ${{ matrix.environment }}"
+          exit 1

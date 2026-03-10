@@ -1,0 +1,34 @@
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+*.tflock
+# .terraform.lock.hcl files ARE committed — they pin provider versions for reproducibility
+terraform/environments/**/terraform.tfvars
+terraform/bootstrap/terraform.tfvars
+
+# Kubernetes
+**/secret.yaml
+**/secrets.yaml
+kubeconfig
+*.kubeconfig
+~/.kube/ai-demo-*
+
+# Go
+app/demo-app
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Misc
+*.log
+.env
+.claude/

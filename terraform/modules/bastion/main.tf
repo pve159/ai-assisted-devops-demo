@@ -4,7 +4,7 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-arm64-server-*"]
   }
 
   filter {
@@ -15,7 +15,7 @@ data "aws_ami" "ubuntu" {
 
 resource "aws_instance" "bastion" {
   ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.micro"
+  instance_type          = "t4g.micro"
   subnet_id              = var.subnet_id
   vpc_security_group_ids = [var.bastion_sg_id]
   iam_instance_profile   = var.iam_instance_profile

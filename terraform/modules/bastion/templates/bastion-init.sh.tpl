@@ -91,7 +91,7 @@ backend k3s-masters
 CFG
 
 for ip in $MASTER_IPS; do
-  echo "    server master-${ip//./-} $ip:6443 check" >> "$TMP"
+  echo "    server master-$${ip//./-} $ip:6443 check" >> "$TMP"
 done
 
 cat >> "$TMP" << CFG
@@ -113,7 +113,7 @@ backend ingress-http
 CFG
 
 for ip in $MASTER_IPS; do
-  echo "    server node-${ip//./-} $ip:80 check" >> "$TMP"
+  echo "    server node-$${ip//./-} $ip:80 check" >> "$TMP"
 done
 
 echo "" >> "$TMP"
@@ -122,7 +122,7 @@ echo "    balance roundrobin" >> "$TMP"
 echo "    option tcp-check" >> "$TMP"
 
 for ip in $MASTER_IPS; do
-  echo "    server node-${ip//./-} $ip:443 check" >> "$TMP"
+  echo "    server node-$${ip//./-} $ip:443 check" >> "$TMP"
 done
 
 # Atomic update: validate then swap

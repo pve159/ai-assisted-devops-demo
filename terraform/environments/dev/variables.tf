@@ -31,13 +31,13 @@ variable "availability_zones" {
 variable "master_instance_type" {
   description = "EC2 instance type for k3s master"
   type        = string
-  default     = "t4g.micro"
+  default     = "t3.micro"
 }
 
 variable "worker_instance_type" {
   description = "EC2 instance type for k3s workers"
   type        = string
-  default     = "t4g.micro"
+  default     = "t3.micro"
 }
 
 variable "workers_per_subnet" {

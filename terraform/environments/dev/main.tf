@@ -6,6 +6,7 @@ provider "aws" {
       Project     = "ai-demo"
       Environment = "dev"
       ManagedBy   = "terraform"
+      Owner       = "platform-team"
     }
   }
 }

@@ -140,7 +140,9 @@ resource "aws_iam_role_policy" "ssm" {
           "ssm:GetParameters",
           "ssm:PutParameter",
           "ssm:DeleteParameter",
-          "ssm:DescribeParameters"
+          "ssm:DescribeParameters",
+          "ssm:AddTagsToResource",
+          "ssm:ListTagsForResource"
         ]
         Resource = "arn:aws:ssm:*:*:parameter/ai-demo/*"
       }

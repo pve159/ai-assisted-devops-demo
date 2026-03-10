@@ -20,26 +20,80 @@ Terraform and managed by a GitHub Actions CI/CD pipeline.
 
 ## Architecture
 
-```
-Internet → Bastion (Elastic IP) ─── HAProxy ──► k3s masters (private subnets)
-                │                              ► k3s workers (private subnets, ASG)
-                │  NAT
-                └──────────────────────────────► outbound traffic from private nodes
+```mermaid
+graph TB
+    Internet((Internet))
 
-Admin access:  AWS SSM Session Manager  (no SSH, no open port 22)
-kubectl:       SSM port forwarding → bastion:6443 → HAProxy → k3s API
+    subgraph AWS["AWS — eu-west-3"]
+        subgraph VPC["VPC  10.0.0.0/16"]
+            subgraph Public["Public subnet  10.0.1.0/24  (eu-west-3a)"]
+                Bastion["🖥️ Bastion  t3.micro\nElastic IP\nNAT instance · HAProxy"]
+            end
+
+            subgraph AZ1["Private subnet  10.0.10.0/24  (eu-west-3a)"]
+                M1["k3s Master 1\nt3.medium"]
+                W1["k3s Worker\nt3.medium"]
+                W2["k3s Worker\nt3.medium"]
+            end
+
+            subgraph AZ2["Private subnet  10.0.11.0/24  (eu-west-3b)"]
+                M2["k3s Master 2\nt3.medium"]
+                W3["k3s Worker\nt3.medium"]
+                W4["k3s Worker\nt3.medium"]
+            end
+        end
+
+        SSM[("SSM Parameter Store\n/ai-demo/dev/kubeconfig")]
+        S3[("S3\nterraform state")]
+    end
+
+    Engineer(["👤 Engineer"])
+
+    Internet -->|":80 / :443"| Bastion
+    Bastion -->|"HAProxy :6443"| M1
+    Bastion -->|"HAProxy :6443"| M2
+    Bastion -->|NAT| AZ1
+    Bastion -->|NAT| AZ2
+    Engineer -->|"SSM Session Manager\nno SSH · no port 22"| Bastion
+    Engineer -->|"SSM port-forward :6443\nkubectl"| Bastion
+    M1 <-->|"Flannel VXLAN"| M2
+    M1 <-->|"Flannel VXLAN"| W1
+    M2 <-->|"Flannel VXLAN"| W3
 ```
 
-See [docs/architecture.md](docs/architecture.md) for the full diagram.
+> **No SSH.** All admin access goes through AWS SSM Session Manager.
+> kubectl uses SSM port forwarding → HAProxy on the bastion → k3s API.
+
+See [docs/architecture.md](docs/architecture.md) for the full diagram and security model.
 
 ## CI/CD pipelines
+
+```mermaid
+flowchart LR
+    PR([Pull Request]) --> fmt[terraform fmt]
+    fmt --> val[validate\n+ TFLint]
+    val --> plan[terraform plan]
+    plan --> cost[Infracost\nestimate]
+    cost --> review([Review & merge])
+
+    review --> apply[terraform apply]
+    apply --> gate{Environment\napproval}
+    gate -->|Approved| deployed([Deployed ✅])
+
+    schedule([Daily 07:00 UTC]) --> drift[terraform plan\n-detailed-exitcode]
+    drift -->|drift detected| issue([GitHub Issue 🔴])
+
+    manual([Manual trigger\n+ type DESTROY]) --> guard[Confirm\nDESTROY]
+    guard --> gate2{Environment\napproval}
+    gate2 -->|Approved| destroy[terraform destroy]
+```
 
 | Workflow | Trigger | Description |
 |----------|---------|-------------|
 | `terraform-ci.yml` | PR → `main` (on `terraform/**`) | fmt → validate → TFLint → plan → Infracost |
-| `terraform-cd.yml` | Push → `main` (on `terraform/**`) | `terraform apply` |
-| `terraform-drift.yml` | Daily 07:00 UTC + manual | `terraform plan -detailed-exitcode` — opens a GitHub issue on drift |
-| `terraform-destroy.yml` | Manual only | `terraform destroy` — requires typing **`DESTROY`** to confirm |
+| `terraform-cd.yml` | Push → `main` (on `terraform/**`) | `terraform apply` + Environment approval |
+| `terraform-drift.yml` | Daily 07:00 UTC + manual | Drift detection — opens a GitHub issue on change |
+| `terraform-destroy.yml` | Manual only | `terraform destroy` — requires `DESTROY` + Environment approval |
 | `app-build-push.yml` | Push/PR on `app/**` | Build & push Docker image to GHCR |
 
 ## Repository structure

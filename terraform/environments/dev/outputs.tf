@@ -1,7 +1,7 @@
 locals {
-  env             = "dev"
-  bastion_id      = module.platform.bastion_instance_id
-  bastion_ip      = module.platform.bastion_public_ip
+  env        = "dev"
+  bastion_id = module.platform.bastion_instance_id
+  bastion_ip = module.platform.bastion_public_ip
   master_ids = module.platform.master_instance_ids
 }
 

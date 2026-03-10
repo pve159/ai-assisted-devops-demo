@@ -180,7 +180,7 @@ jobs:
       - name: Generate Infracost estimate
         run: |
           infracost breakdown \
-            --terraform-plan-file tfplan.json \
+            --path tfplan.json \
             --format json \
             --out-file infracost.json
 

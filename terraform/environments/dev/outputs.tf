@@ -21,8 +21,8 @@ output "ssm_connect_masters" {
 }
 
 output "ssm_kubectl_tunnel" {
-  description = "Forward port 6443 via SSM to reach the k3s API through HAProxy on the bastion"
-  value       = "aws ssm start-session --target ${local.bastion_id} --region eu-west-3 --document-name AWS-StartPortForwardingSession --parameters '{\"localPortNumber\":[\"6443\"],\"portNumber\":[\"6443\"]}'"
+  description = "Forward port 6443 via SSM — use: terraform output -raw ssm_kubectl_tunnel"
+  value       = "aws ssm start-session --target ${local.bastion_id} --region eu-west-3 --document-name AWS-StartPortForwardingSession --parameters portNumber=6443 localPortNumber=6443"
 }
 
 output "kubeconfig_command" {
@@ -31,9 +31,8 @@ output "kubeconfig_command" {
     aws ssm get-parameter \
       --name "/ai-demo/${local.env}/kubeconfig" \
       --with-decryption \
-      --query "Parameter.Value" \
-      --output text \
-      | sed 's|server: https://[^:]*:|server: https://127.0.0.1:|' \
+      --region eu-west-3 \
+      | jq -r '.Parameter.Value' \
       > ~/.kube/ai-demo-${local.env}
     export KUBECONFIG=~/.kube/ai-demo-${local.env}
   CMD

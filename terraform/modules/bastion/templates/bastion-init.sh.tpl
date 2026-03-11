@@ -5,7 +5,13 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 # Remove ufw first — conflicts with direct iptables management
 apt-get remove -y ufw || true
-apt-get install -y netfilter-persistent iptables-persistent haproxy awscli
+apt-get install -y netfilter-persistent iptables-persistent haproxy unzip
+
+# AWS CLI v2 (awscli apt package removed in Ubuntu 24.04 Noble)
+curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o /tmp/awscliv2.zip
+unzip -q /tmp/awscliv2.zip -d /tmp
+/tmp/aws/install
+rm -rf /tmp/awscliv2.zip /tmp/aws
 
 # =============================================================================
 # NAT instance setup

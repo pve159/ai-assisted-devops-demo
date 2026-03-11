@@ -5,6 +5,16 @@ on:
     branches: [main]
     paths:
       - "terraform/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to plan"
+        required: false
+        type: choice
+        default: dev
+        options:
+          - dev
+          - prod
 
 permissions:
   id-token: write       # OIDC authentication
@@ -14,7 +24,7 @@ permissions:
 env:
   TF_VERSION: "1.10.0"
   AWS_REGION: "eu-west-3"
-  WORKING_DIR: "terraform/environments/dev"
+  WORKING_DIR: "terraform/environments/${{ inputs.environment || 'dev' }}"
 
 jobs:
   fmt:
@@ -111,7 +121,7 @@ jobs:
         with:
           script: |
             const status = '${{ steps.plan.outcome }}' === 'success' ? '✅' : '❌';
-            const body = `### Terraform Plan — \`dev\` ${status}
+            const body = `### Terraform Plan — \`${{ inputs.environment || 'dev' }}\` ${status}
 
             <details><summary>Show plan</summary>
 
@@ -156,7 +166,7 @@ jobs:
       - name: Upload plan artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: tfplan-dev
+          name: tfplan-${{ inputs.environment || 'dev' }}
           path: |
             ${{ env.WORKING_DIR }}/tfplan
             ${{ env.WORKING_DIR }}/tfplan.json
@@ -170,7 +180,7 @@ jobs:
       - name: Download plan artifact
         uses: actions/download-artifact@v4
         with:
-          name: tfplan-dev
+          name: tfplan-${{ inputs.environment || 'dev' }}
 
       - name: Setup Infracost
         uses: infracost/actions/setup@v3

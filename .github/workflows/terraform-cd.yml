@@ -5,6 +5,15 @@ on:
     branches: [main]
     paths:
       - "terraform/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to apply"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
 
 permissions:
   id-token: write
@@ -22,8 +31,7 @@ jobs:
 
     strategy:
       matrix:
-        environment: [dev]
-        # Add prod here when ready, with a required GitHub Environment reviewer
+        environment: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', inputs.environment)) || fromJson('["dev","prod"]') }}
       max-parallel: 1
 
     steps:

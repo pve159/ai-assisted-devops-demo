@@ -26,11 +26,9 @@ until kubectl get nodes 2>/dev/null | grep -q " Ready"; do
   sleep 5
 done
 
-# Use the instance's PRIVATE IP (no public IP in private subnet)
-PRIVATE_IP=$(curl -sf http://169.254.169.254/latest/meta-data/local-ipv4)
-sed "s/127.0.0.1/$${PRIVATE_IP}/g" /etc/rancher/k3s/k3s.yaml > /tmp/kubeconfig
-
 # Store kubeconfig in SSM Parameter Store
+# Keep 127.0.0.1 — access is always via SSM tunnel (localhost:6443 → bastion HAProxy → master)
+cp /etc/rancher/k3s/k3s.yaml /tmp/kubeconfig
 aws ssm put-parameter \
   --name "${ssm_path}" \
   --value "$(cat /tmp/kubeconfig)" \

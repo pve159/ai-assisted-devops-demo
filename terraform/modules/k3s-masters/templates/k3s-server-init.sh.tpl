@@ -1,6 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
+# Ensure SSM agent is running (pre-installed in Ubuntu 24.04 AMI)
+systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
+systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
+
 # Install k3s server
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" K3S_TOKEN="${k3s_token}" sh -s - server \
   --write-kubeconfig-mode 644 \

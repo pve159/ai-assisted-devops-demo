@@ -33,6 +33,7 @@ resource "aws_instance" "master" {
     tags        = var.instance_tags
   }
 
+  user_data_replace_on_change = true
   user_data = templatefile("${path.module}/templates/k3s-server-init.sh.tpl", {
     k3s_version = var.k3s_version
     k3s_token   = var.k3s_token

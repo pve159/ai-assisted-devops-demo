@@ -30,6 +30,7 @@ resource "aws_instance" "bastion" {
     tags        = var.instance_tags
   }
 
+  user_data_replace_on_change = true
   user_data = templatefile("${path.module}/templates/bastion-init.sh.tpl", {
     vpc_cidr    = var.vpc_cidr
     aws_region  = var.aws_region

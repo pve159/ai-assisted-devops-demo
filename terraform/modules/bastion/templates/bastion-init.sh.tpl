@@ -3,19 +3,21 @@ set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y iptables-persistent haproxy awscli
+# Remove ufw first — conflicts with direct iptables management
+apt-get remove -y ufw || true
+apt-get install -y netfilter-persistent iptables-persistent haproxy awscli
 
 # =============================================================================
 # NAT instance setup
 # source_dest_check is disabled at the Terraform resource level.
 # =============================================================================
 
-# Enable IP forwarding permanently
-cat >> /etc/sysctl.conf << 'SYSCTL'
+# Enable IP forwarding permanently via sysctl.d (survives sysctl.conf rewrites)
+cat > /etc/sysctl.d/99-ip-forward.conf << 'SYSCTL'
 net.ipv4.ip_forward = 1
 net.ipv4.conf.all.forwarding = 1
 SYSCTL
-sysctl -p
+sysctl --system
 
 # Primary network interface
 PRIMARY_IF=$(ip route get 8.8.8.8 | awk '{print $5; exit}')

@@ -22,7 +22,7 @@ output "ssm_connect_masters" {
 
 output "ssm_kubectl_tunnel" {
   description = "Forward port 6443 via SSM — use: terraform output -raw ssm_kubectl_tunnel"
-  value       = "aws ssm start-session --target ${local.bastion_id} --region eu-west-3 --document-name AWS-StartPortForwardingSession --parameters portNumber=6443 localPortNumber=6443"
+  value       = "aws ssm start-session --target ${local.bastion_id} --region eu-west-3 --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"6443\"],\"localPortNumber\":[\"6443\"]}'"
 }
 
 output "kubeconfig_command" {

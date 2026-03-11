@@ -102,7 +102,8 @@ resource "aws_iam_role_policy" "iam" {
           "iam:ListAttachedRolePolicies",
           "iam:TagRole",
           "iam:UntagRole",
-          "iam:UpdateAssumeRolePolicy"
+          "iam:UpdateAssumeRolePolicy",
+          "iam:ListInstanceProfilesForRole"
         ]
         Resource = "arn:aws:iam::*:role/${local.prefix}-*"
       },

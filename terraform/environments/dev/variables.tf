@@ -25,7 +25,7 @@ variable "private_subnet_cidrs" {
 variable "availability_zones" {
   description = "Availability zones (same length as private_subnet_cidrs)"
   type        = list(string)
-  default     = ["eu-west-3a", "eu-west-3b"]
+  default     = ["eu-west-3b", "eu-west-3c"]
 }
 
 variable "master_instance_type" {
